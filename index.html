@@ -734,10 +734,14 @@ auth.onAuthStateChanged(async user=>{
 function renderUserBox(){
   const el=document.getElementById('userBox');
   if(!el||!currentUser)return;
+  const isAdminUser=currentUser.id===ADMIN_UID;
   el.innerHTML=`<div class="user-box">
     <div class="player-avatar" style="background:${currentUser.color}">${currentUser.name[0].toUpperCase()}</div>
     <div class="user-box-name">${currentUser.name}</div>
     <button class="logout-btn" onclick="handleLogout()">Salir</button>
+  </div>
+  <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px;word-break:break-all">
+    UID: ${currentUser.id} ${isAdminUser?'✅ admin':'❌ no admin'}
   </div>`;
 }
 
@@ -804,7 +808,7 @@ function renderMatches(){
 }
 
 function renderCard(m,af){
-  const r=results[m.id]||{h:'',a:''};
+  const r={h:'',a:'',...(results[m.id]||{})};
   const hasResult=r.h!==''&&r.a!=='';
   const fh=FLAGS[m.home]||'🏳️';
   const fa=FLAGS[m.away]||'🏳️';
