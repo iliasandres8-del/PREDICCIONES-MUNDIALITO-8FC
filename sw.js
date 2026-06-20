@@ -6,7 +6,7 @@
 
 const CACHE_NAME = 'mundial2026-v1';
 const STATIC_FILES = [
-  './mundial2026_predicciones.html',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
