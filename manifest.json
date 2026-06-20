@@ -2,7 +2,7 @@
   "name": "Mundial 2026 - Predicciones",
   "short_name": "Mundial 2026",
   "description": "Predicciones del Mundial 2026 entre amigos",
-  "start_url": "./mundial2026_predicciones.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
