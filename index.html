@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mundial 2026 · Predicciones</title>
+
+<!-- PWA: permite instalar esta página como app en el celular -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#4f46e5">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mundial 2026">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -652,10 +663,6 @@ const FLAGS={
 // Horarios oficiales en hora de Colombia (UTC-5), confirmados según
 // transmisión DSPORTS / Caracol / RCN / Win Sports / Disney+.
 const MATCHES=[
-  {id:1, date:'Vie 19 Jun', group:'Grupo D', home:'Estados Unidos', away:'Australia', time:'2:00 p.m.', kickoffCO:'2026-06-19T14:00:00-05:00'},
-  {id:2, date:'Vie 19 Jun', group:'Grupo C', home:'Escocia', away:'Marruecos', time:'5:00 p.m.', kickoffCO:'2026-06-19T17:00:00-05:00'},
-  {id:3, date:'Vie 19 Jun', group:'Grupo C', home:'Brasil', away:'Haití', time:'8:00 p.m.', kickoffCO:'2026-06-19T20:00:00-05:00'},
-  {id:4, date:'Vie 19 Jun', group:'Grupo D', home:'Turquía', away:'Paraguay', time:'11:00 p.m.', kickoffCO:'2026-06-19T23:00:00-05:00'},
   {id:5, date:'Sáb 20 Jun', group:'Grupo F', home:'Países Bajos', away:'Suecia', time:'2:00 p.m.', kickoffCO:'2026-06-20T14:00:00-05:00'},
   {id:6, date:'Sáb 20 Jun', group:'Grupo E', home:'Alemania', away:'Costa de Marfil', time:'3:00 p.m.', kickoffCO:'2026-06-20T15:00:00-05:00'},
   {id:7, date:'Sáb 20 Jun', group:'Grupo E', home:'Ecuador', away:'Curazao', time:'7:00 p.m.', kickoffCO:'2026-06-20T19:00:00-05:00'},
@@ -918,7 +925,6 @@ function saveManualAdjust(fid){
 }
 
 const DAYNAMES={
-  'Vie 19 Jun':'Viernes 19 de Junio',
   'Sáb 20 Jun':'Sábado 20 de Junio',
   'Dom 21 Jun':'Domingo 21 de Junio',
   'Lun 22 Jun':'Lunes 22 de Junio',
@@ -1214,6 +1220,16 @@ setInterval(()=>{
     renderMatches();
   }
 },20000);
+
+// Registro del Service Worker para que la página se pueda instalar
+// como app (PWA) en el celular y abra más rápido las siguientes veces.
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(err=>{
+      console.warn('No se pudo registrar el service worker:',err);
+    });
+  });
+}
 </script>
 </body>
 </html>
