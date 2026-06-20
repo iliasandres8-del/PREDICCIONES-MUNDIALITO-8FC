@@ -233,6 +233,34 @@ input{font-family:inherit}
 }
 .no-players{text-align:center;padding:20px 10px;color:var(--muted);font-size:13px}
 
+.player-row-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.player-manual-tag{
+  font-family:var(--mono);font-size:10.5px;font-weight:700;
+  color:var(--gold-text);background:var(--gold-bg);border:1px solid var(--gold-border);
+  border-radius:var(--radius-sm);padding:2px 7px;
+}
+.btn-edit-pts{
+  background:var(--surface-alt);border:1px solid var(--border);color:var(--muted);
+  font-size:11px;font-weight:700;padding:4px 9px;border-radius:var(--radius-sm);
+  cursor:pointer;transition:all .15s; flex-shrink:0;
+}
+.btn-edit-pts:hover{color:var(--primary);border-color:var(--primary);background:var(--primary-soft)}
+.edit-pts-form{display:flex;align-items:center;gap:6px;margin-top:8px}
+.edit-pts-input{
+  width:64px;text-align:center;font-family:var(--mono);font-size:13px;font-weight:700;
+  background:var(--surface-soft);border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);
+  color:var(--text);padding:6px 4px;outline:none;
+}
+.edit-pts-input:focus{border-color:var(--primary)}
+.btn-edit-save{
+  background:var(--primary);border:none;border-radius:var(--radius-sm);color:#fff;
+  font-size:11px;font-weight:700;padding:6px 10px;cursor:pointer;
+}
+.btn-edit-cancel{
+  background:none;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);
+  font-size:11px;font-weight:700;padding:6px 10px;cursor:pointer;
+}
+
 /* scoring box */
 .score-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 16px;box-shadow:var(--shadow-sm)}
 .score-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13.5px;color:var(--text-soft);font-weight:500}
@@ -703,7 +731,9 @@ function calcPts(mid,fid){
 function totals(fid){
   let pts=0,ex=0,win=0;
   MATCHES.forEach(m=>{const p=calcPts(m.id,fid);if(p===3){pts+=3;ex++}else if(p===1){pts+=1;win++}});
-  return{pts,ex,win};
+  const f=friends.find(x=>x.id===fid);
+  const manual=f&&typeof f.manualAdjust==='number'?f.manualAdjust:0;
+  return{pts:pts+manual,ex,win,manual};
 }
 
 let authMode='login';
@@ -843,21 +873,48 @@ function renderUserBox(){
   </div>`;
 }
 
+let editingPtsFor=null;
+
 function renderPlayers(){
   const el=document.getElementById('playerList');
   if(!friends.length){
     el.innerHTML='<div class="no-players">Cargando participantes...</div>';
     return;
   }
+  const isAdmin=currentUser&&currentUser.id===ADMIN_UID;
   el.innerHTML=friends.map(f=>{
-      const{pts}=totals(f.id);
+      const{pts,manual}=totals(f.id);
       const isMe=currentUser&&f.id===currentUser.id;
+      const isEditing=editingPtsFor===f.id;
       return`<div class="player-card ${isMe?'active':''}">
         <div class="player-avatar" style="background:${f.color}">${f.name[0].toUpperCase()}</div>
         <div class="player-name">${f.name}${isMe?' (tú)':''}</div>
         <div class="player-pts">${pts}p</div>
-      </div>`;
+      </div>
+      ${isAdmin?`<div class="player-row-bottom">
+        ${manual?`<span class="player-manual-tag">ajuste ${manual>0?'+':''}${manual}</span>`:'<span></span>'}
+        <button class="btn-edit-pts" onclick="toggleEditPts('${f.id}')">✏️ Editar puntos</button>
+      </div>
+      ${isEditing?`<div class="edit-pts-form">
+        <input class="edit-pts-input" id="edit-pts-input-${f.id}" type="number" value="${manual}" placeholder="0">
+        <button class="btn-edit-save" onclick="saveManualAdjust('${f.id}')">Guardar</button>
+        <button class="btn-edit-cancel" onclick="toggleEditPts(null)">Cancelar</button>
+      </div>`:''}`:''}`;
     }).join('');
+}
+
+function toggleEditPts(fid){
+  editingPtsFor=editingPtsFor===fid?null:fid;
+  renderPlayers();
+}
+
+function saveManualAdjust(fid){
+  const input=document.getElementById('edit-pts-input-'+fid);
+  const val=parseInt(input.value,10);
+  const adjust=isNaN(val)?0:val;
+  db.collection('users').doc(fid).set({manualAdjust:adjust},{merge:true})
+    .then(()=>{editingPtsFor=null;})
+    .catch(err=>{console.error('Error guardando ajuste:',err);alert('No se pudo guardar el ajuste. Intenta de nuevo.');});
 }
 
 const DAYNAMES={
