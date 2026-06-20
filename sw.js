@@ -4,7 +4,7 @@
 // Los datos (predicciones, resultados, usuarios) siempre vienen en vivo
 // desde Firebase, este caché NO afecta esa información.
 
-const CACHE_NAME = 'mundial2026-v1';
+const CACHE_NAME = 'mundial2026-v2';
 const STATIC_FILES = [
   './index.html',
   './manifest.json',
